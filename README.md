@@ -1,44 +1,43 @@
 # J.A.R.V.I.S. Voice Assistant 🦾🤖
 
-Un prototipo de asistente de voz local, interactivo e inteligente inspirado en **J.A.R.V.I.S.**, el sofisticado asistente cibernético de Iron Man.
+A prototype of a local, interactive, and intelligent voice assistant inspired by **J.A.R.V.I.S.**, the sophisticated cybernetic assistant of Iron Man.
 
-Este asistente cuenta con un rostro minimalista y holográfico que parpadea, mira a su alrededor y sincroniza el movimiento de su boca (lip-sync) en tiempo real según la intensidad del habla. Ejecuta todos sus modelos locales gracias a tu GPU (probado en una **RTX 3090**), con cero dependencias en la nube.
-
----
-
-## 📸 Demo en Acción
-
-![J.A.R.V.I.S. Demo](demo.gif)
-
+This assistant features a minimalist holographic face that blinks, looks around, and synchronizes its mouth movement (lip-sync) in real-time based on the volume of the synthetic speech. It runs all its models locally on your GPU (tested on an **RTX 3090**), with zero cloud dependencies.
 
 ---
 
-## 🚀 Características Principales
+## 📸 Demo in Action
 
-*   **Rostro Holográfico Animado:** Construido sobre **CustomTkinter** con un diseño oscuro ultra-moderno de tipo cyberpunk. Reacciona dinámicamente según el estado (En espera, Escuchando, Pensando, Hablando).
-*   **Sincronización Labial Dinámica:** El tamaño de la boca se modula en tiempo real calculando la amplitud RMS de la reproducción de audio sintético.
-*   **Oído Ultra Rápido (STT):** Transcripción local usando **`Faster-Whisper`** acelerada mediante CUDA en la GPU.
-*   **Cerebro Inteligente Local (LLM):** Utiliza **Ollama** (`llama3.1:8b`) para mantener conversaciones contextuales en español formal (tratamiento de "Señor" o "Sir").
-*   **Herramientas Locales (Function Calling / Agents):**
-    *   *Hora del Sistema:* Consulta de fecha y hora exacta del sistema en tiempo real.
-    *   *Calculadora Aritmética:* Resuelve operaciones aritméticas con exactitud matemática real.
-    *   *Búsqueda en Internet (Web Search):* Realiza búsquedas de noticias o clima en internet en tiempo real mediante DuckDuckGo (paquete `ddgs`), permitiendo que el LLM responda con información al día.
-*   **Voz en Español Sintética (TTS):** Generación de voz natural y veloz basada en **`Kokoro-ONNX`** utilizando una voz masculina adaptada (`em_alex`).
-*   **Panel de Control en Vivo:** Slider para ajustar la velocidad de lectura (0.8x a 2.0x) y selector dinámico de voz que ajusta automáticamente los parámetros fonéticos en tiempo real.
+<img src="demo.gif" width="100%" alt="J.A.R.V.I.S. Demo" />
 
 ---
 
-## 🛠️ Requisitos e Instalación
+## 🚀 Key Features
 
-### 1. Requisitos Previos
-*   Tener **Ollama** instalado y corriendo con el modelo `llama3.1`:
+*   **Animated Holographic HUD Face:** Built on **CustomTkinter** with a sleek, ultra-modern dark cyberpunk HUD theme. It reacts dynamically based on the state (Idle, Listening, Thinking, Speaking).
+*   **Dynamic Lip-Sync:** The mouth size and frequency waves are modulated in real-time by calculating the RMS amplitude of the played speech audio blocks.
+*   **Blazing Fast Speech-to-Text (STT):** Local transcription using **`Faster-Whisper`** accelerated by CUDA on the GPU.
+*   **Local Intelligent Brain (LLM):** Powered by **Ollama** (`llama3.1:8b`) to maintain contextual conversations in formal Spanish or English (addressing the user as "Sir" or "Señor").
+*   **Local Function Calling (Agent Tools):**
+    *   *System Time:* Retrieves the exact system time, day, and date.
+    *   *Arithmetic Calculator:* Evaluates math expressions with real python calculation accuracy.
+    *   *Web Search:* Searches the web in real-time for news, weather, or current events using DuckDuckGo (via `ddgs` package), allowing the LLM to reply with up-to-date information.
+*   **Synthetic Speech (TTS):** Natural and high-speed local speech generation using **`Kokoro-ONNX`** with a customized male voice (`em_alex`).
+*   **Live Control Panel:** Dynamically select voices and adjust speech speed (0.8x to 2.0x, default 1.1x) on the fly, with automated language code mapping.
+
+---
+
+## 🛠️ Requirements & Installation
+
+### 1. Prerequisites
+*   Have **Ollama** installed and running with the `llama3.1` model pulled:
     ```bash
     ollama pull llama3.1
     ```
-*   Tener instalado **CUDA 12** y controladores de Nvidia actualizados para habilitar la velocidad del STT en la GPU.
+*   Have **CUDA 12** and updated Nvidia drivers installed on your system to enable GPU acceleration for Faster-Whisper.
 
-### 2. Configuración del Entorno
-Clona este repositorio, crea tu entorno virtual e instala las dependencias:
+### 2. Setup
+Clone this repository, create your virtual environment, and install dependencies:
 
 ```bash
 git clone https://github.com/rodriamaro/face-assistant-demo.git
@@ -48,32 +47,32 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-*(Nota: En la primera ejecución se descargarán automáticamente los pesos del modelo Kokoro TTS y voices en una carpeta local `models/` de unos 330 MB totales).*
+*(Note: On the first run, the Kokoro ONNX model weights and voices files (~330 MB total) will be automatically downloaded into the local `models/` directory).*
 
 ---
 
-## 🕹️ Cómo Ejecutar
+## 🕹️ Usage
 
-Activa tu entorno virtual y arranca la aplicación:
+Activate your virtual environment and start the application:
 
 ```bash
 source venv/bin/activate
 python main.py
 ```
 
-### Flujo del Asistente:
-1. **Inicio:** Verás el rostro en color morado (Pensando) mientras carga Whisper en la GPU.
-2. **Calibración:** La cara cambia a naranja (Escuchando) durante 1.5 segundos para ajustar el micrófono según el ruido de fondo.
-3. **Bienvenida:** J.A.R.V.I.S. se presentará de forma muy corta por voz informando el estado de sus sistemas.
-4. **Charla Activa:** La pantalla se tornará azul (En espera). Hazle cualquier pregunta (ej. *"¿Qué clima hace en Santiago?", "¿Cuánto es 54 por 12?"* o *"Jarvis, ¿cuáles son las últimas noticias de tecnología?"*).
+### Assistant Flow:
+1. **Startup:** You will see the face turn purple (Thinking state) while it preloads CUDA libraries and loads Whisper into the GPU.
+2. **Calibration:** The face changes to orange (Listening state) for 1.5 seconds to calibrate the microphone threshold to your room's background noise floor.
+3. **Greeting:** J.A.R.V.I.S. will introduce itself by speaking a very short greeting, confirming systems are online.
+4. **Active Chat:** The face turns blue (Idle state). Ask him anything (e.g., *"What is the weather in Santiago?"*, *"What is 54 times 12?"* or *"Jarvis, tell me the latest news on technology"*).
 
 ---
 
-## 📁 Estructura de Código
+## 📁 Repository Structure
 
-*   `main.py`: Orquestador principal que maneja los hilos de ejecución en segundo plano y el flujo conversacional.
-*   `face_gui.py`: Renderizador gráfico del rostro y controles usando CustomTkinter.
-*   `audio_handler.py`: Modulación del audio, grabación, calibración del ruido de fondo VAD y resampleado a 48,000 Hz estéreo.
-*   `tts_handler.py`: Interfaz local con el motor Kokoro-ONNX.
-*   `brain.py`: Interfaz de agente con Ollama y definiciones de herramientas locales.
-*   `downloader.py`: Descarga y validación automática de los modelos.
+*   `main.py`: Central orchestrator running background threads and the speech dialogue loop.
+*   `face_gui.py`: Graphical user interface, canvas vector animations, and CustomTkinter controls.
+*   `audio_handler.py`: Dynamic microphone recording, energy-based VAD, audio playback, and 48,000 Hz stereo resampling.
+*   `tts_handler.py`: Local interface to the Kokoro-ONNX voice engine.
+*   `brain.py`: LLM agent manager, Ollama interface, and local tool executors.
+*   `downloader.py`: Automatic model downloader with terminal progress reporting.
