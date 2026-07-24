@@ -6,9 +6,10 @@ Este asistente cuenta con un rostro minimalista y holográfico que parpadea, mir
 
 ---
 
-## 📸 Captura de Pantalla
+## 📸 Demo en Acción
 
-![J.A.R.V.I.S. Interface](screenshot.jpg)
+![J.A.R.V.I.S. Demo](demo.gif)
+
 
 ---
 
