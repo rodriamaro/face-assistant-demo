@@ -1,4 +1,3 @@
-pygame
 numpy
 sounddevice
 soundfile
@@ -6,3 +5,11 @@ ollama
 faster-whisper
 silero-vad
 onnxruntime
+customtkinter
+ddgs
+langchain
+langchain-ollama
+langgraph
+langchain-community
+wikipedia
+arxiv

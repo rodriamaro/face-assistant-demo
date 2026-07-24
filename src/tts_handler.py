@@ -2,14 +2,15 @@ import os
 from kokoro_onnx import Kokoro
 
 class TTSHandler:
-    def __init__(self, model_path="models/kokoro-v1.0.onnx", voices_path="models/voices-v1.0.bin"):
-        self.model_path = model_path
-        self.voices_path = voices_path
+    def __init__(self, model_path=None, voices_path=None):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.model_path = model_path or os.path.join(base_dir, "models", "kokoro-v1.0.onnx")
+        self.voices_path = voices_path or os.path.join(base_dir, "models", "voices-v1.0.bin")
         self.kokoro = None
         self.is_initialized = False
         
         # Check if files exist before initializing
-        if os.path.exists(model_path) and os.path.exists(voices_path):
+        if os.path.exists(self.model_path) and os.path.exists(self.voices_path):
             self.init_model()
         else:
             print("[TTS] Los archivos del modelo no están disponibles. Se inicializará cuando estén listos.")

@@ -59,7 +59,7 @@ Activate your virtual environment and start the application:
 
 ```bash
 source venv/bin/activate
-python main.py
+python src/main.py
 ```
 
 ### Assistant Flow:
@@ -72,9 +72,10 @@ python main.py
 
 ## 📁 Repository Structure
 
-*   `main.py`: Central orchestrator running background threads and the speech dialogue loop.
-*   `face_gui.py`: Graphical user interface, canvas vector animations, and CustomTkinter controls.
-*   `audio_handler.py`: Dynamic microphone recording, energy-based VAD, audio playback, and 48,000 Hz stereo resampling.
-*   `tts_handler.py`: Local interface to the Kokoro-ONNX voice engine.
-*   `brain.py`: Advanced LangGraph agent manager, Ollama interface, and local tool definitions.
-*   `downloader.py`: Automatic model downloader with terminal progress reporting.
+All the core Python code is organized inside the `src/` directory:
+*   `src/main.py`: Central orchestrator running background threads and the speech dialogue loop.
+*   `src/face_gui.py`: Graphical user interface, canvas vector animations, and CustomTkinter controls.
+*   `src/audio_handler.py`: Dynamic microphone recording, energy-based VAD, audio playback, and 48,000 Hz stereo resampling.
+*   `src/tts_handler.py`: Local interface to the Kokoro-ONNX voice engine.
+*   `src/brain.py`: Advanced LangGraph agent manager, Ollama interface, and local tool definitions.
+*   `src/downloader.py`: Automatic model downloader with terminal progress reporting.
