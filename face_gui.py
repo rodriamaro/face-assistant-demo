@@ -23,21 +23,21 @@ class FaceGUI:
         self.current_voice = "em_alex"
         self.current_speed = 1.1
         
-        # Color definitions for states (Nick Jr. style but stylized)
-        self.colors = {
-            "IDLE": "#1a365d",       # Dark slate blue
-            "LISTENING": "#c05621",  # Dark orange
-            "THINKING": "#553c9a",   # Dark purple
-            "SPEAKING": "#22543d"    # Dark forest green
+        # Stylized Cyberpunk colors for each state
+        # Contains: (Background Color, Primary Glow Color, Faint Grid Color)
+        self.state_themes = {
+            "IDLE": ("#060b13", "#3b82f6", "#111a2e"),       # Neon Blue / Deep Slate
+            "LISTENING": ("#150c05", "#f97316", "#2c170a"),  # Neon Orange / Dark Copper
+            "THINKING": ("#0f071b", "#a855f7", "#22113a"),   # Neon Purple / Dark Indigo
+            "SPEAKING": ("#021315", "#06b6d4", "#0b2a2e")    # Neon Cyan / Dark Teal
         }
         
         # Canvas setup (fixed at top, height 600)
-        # Using standard tk.Canvas for precise pixel/vector drawing
         self.canvas = tk.Canvas(self.root, width=600, height=600, highlightthickness=0)
         self.canvas.pack(fill="x", side="top")
         
         # Bottom controls frame (Modern CTkFrame)
-        self.control_frame = ctk.CTkFrame(self.root, fg_color="#1e293b", corner_radius=15)
+        self.control_frame = ctk.CTkFrame(self.root, fg_color="#0f172a", corner_radius=15)
         self.control_frame.pack(fill="both", side="bottom", expand=True, padx=15, pady=15)
         
         # Configure layout grids
@@ -67,8 +67,8 @@ class FaceGUI:
             fg_color="#3b82f6",
             button_color="#2563eb",
             button_hover_color="#1d4ed8",
-            dropdown_fg_color="#1e293b",
-            dropdown_hover_color="#334155",
+            dropdown_fg_color="#0f172a",
+            dropdown_hover_color="#1e293b",
             width=160
         )
         self.voice_menu.set("Jarvis (Español M)")
@@ -86,7 +86,7 @@ class FaceGUI:
             to=2.0, 
             number_of_steps=12,
             command=self.on_speed_changed,
-            fg_color="#475569",
+            fg_color="#334155",
             progress_color="#3b82f6",
             button_color="#3b82f6",
             button_hover_color="#1d4ed8"
@@ -95,11 +95,11 @@ class FaceGUI:
         self.speed_slider.grid(row=0, column=3, padx=5, pady=20, sticky="we")
         self.speed_val_lbl.grid(row=0, column=4, padx=5, pady=20, sticky="w")
         
-        # Positions for Face features
-        self.eye_left_center = (200, 220)
-        self.eye_right_center = (400, 220)
-        self.nose_center = (300, 330)
-        self.mouth_center = (300, 440)
+        # Centers for Hologram Face drawing
+        self.face_center = (300, 300)
+        self.eye_left_center = (235, 260)
+        self.eye_right_center = (365, 260)
+        self.mouth_center = (300, 385)
         
         # Animation variables
         self.blink_active = False
@@ -115,7 +115,7 @@ class FaceGUI:
         self.update_loop()
         
     def set_state(self, state):
-        if state in self.colors:
+        if state in self.state_themes:
             self.state = state
             
     def set_mouth_open_ratio(self, ratio):
@@ -125,145 +125,131 @@ class FaceGUI:
         # Clear canvas
         self.canvas.delete("all")
         
-        # Set background color based on state
-        bg_color = self.colors[self.state]
+        # Extract theme colors for the current state
+        bg_color, glow_color, grid_color = self.state_themes[self.state]
         self.canvas.configure(bg=bg_color)
         
-        # 1. DRAW EYEBROWS (Cejas)
-        self.draw_eyebrows()
-        
-        # 2. DRAW EYES (Ojos)
-        self.draw_eyes()
-        
-        # 3. DRAW NOSE (Nariz)
+        # 1. DRAW TECH BACKGROUND GRID
+        # Vertical lines
+        for x in range(0, 600, 40):
+            self.canvas.create_line(x, 0, x, 600, fill=grid_color, width=1)
+        # Horizontal lines
+        for y in range(0, 600, 40):
+            self.canvas.create_line(0, y, 600, y, fill=grid_color, width=1)
+            
+        # 2. DRAW CENTRAL HOLOGRAM RINGS (Double Ring)
+        cx, cy = self.face_center
+        # Outer ring
         self.canvas.create_oval(
-            self.nose_center[0] - 25, self.nose_center[1] - 20,
-            self.nose_center[0] + 25, self.nose_center[1] + 20,
-            fill="#f1c40f", outline="#e67e22", width=3
+            cx - 165, cy - 165, cx + 165, cy + 165,
+            outline=glow_color, width=3
+        )
+        # Inner dashed/thin ring
+        self.canvas.create_oval(
+            cx - 150, cy - 150, cx + 150, cy + 150,
+            outline=glow_color, width=1, dash=(8, 6)
         )
         
-        # 4. DRAW MOUTH (Boca)
-        self.draw_mouth()
+        # 3. DRAW GLOWING EYES
+        self.draw_eyes(glow_color)
+        
+        # 4. DRAW CIRCULAR WAVEFORM MOUTH
+        self.draw_mouth(glow_color)
 
-    def draw_eyes(self):
-        eye_w, eye_h = 90, 110
-        pupil_r = 20
+    def draw_eyes(self, glow_color):
+        eye_r = 18
+        
+        # Calculate pupil/eye shift
+        px_left = self.eye_left_center[0] + self.look_offset_x * 8
+        py_left = self.eye_left_center[1] + self.look_offset_y * 8
+        px_right = self.eye_right_center[0] + self.look_offset_x * 8
+        py_right = self.eye_right_center[1] + self.look_offset_y * 8
         
         if self.blink_active:
-            # Left Eye closed
+            # Draw horizontal glowing lines when blinking
             self.canvas.create_line(
-                self.eye_left_center[0] - 45, self.eye_left_center[1],
-                self.eye_left_center[0] + 45, self.eye_left_center[1],
-                fill="black", width=6, capstyle="round"
+                px_left - 20, py_left, px_left + 20, py_left,
+                fill=glow_color, width=4, capstyle="round"
             )
-            # Right Eye closed
             self.canvas.create_line(
-                self.eye_right_center[0] - 45, self.eye_right_center[1],
-                self.eye_right_center[0] + 45, self.eye_right_center[1],
-                fill="black", width=6, capstyle="round"
+                px_right - 20, py_right, px_right + 20, py_right,
+                fill=glow_color, width=4, capstyle="round"
             )
             return
 
-        # Left Eye White
+        # Left Eye (White filled with neon glow outline)
         self.canvas.create_oval(
-            self.eye_left_center[0] - eye_w/2, self.eye_left_center[1] - eye_h/2,
-            self.eye_left_center[0] + eye_w/2, self.eye_left_center[1] + eye_h/2,
-            fill="white", outline="black", width=4
+            px_left - eye_r, py_left - eye_r,
+            px_left + eye_r, py_left + eye_r,
+            fill="#ffffff", outline=glow_color, width=3
         )
-        # Right Eye White
+        # Right Eye
         self.canvas.create_oval(
-            self.eye_right_center[0] - eye_w/2, self.eye_right_center[1] - eye_h/2,
-            self.eye_right_center[0] + eye_w/2, self.eye_right_center[1] + eye_h/2,
-            fill="white", outline="black", width=4
-        )
-        
-        max_pupil_offset = 12
-        px_left = self.eye_left_center[0] + self.look_offset_x * max_pupil_offset
-        py_left = self.eye_left_center[1] + self.look_offset_y * max_pupil_offset
-        px_right = self.eye_right_center[0] + self.look_offset_x * max_pupil_offset
-        py_right = self.eye_right_center[1] + self.look_offset_y * max_pupil_offset
-        
-        # Left Pupil
-        self.canvas.create_oval(
-            px_left - pupil_r, py_left - pupil_r,
-            px_left + pupil_r, py_right + pupil_r,
-            fill="black", outline=""
-        )
-        # Right Pupil
-        self.canvas.create_oval(
-            px_right - pupil_r, py_right - pupil_r,
-            px_right + pupil_r, py_right + pupil_r,
-            fill="black", outline=""
+            px_right - eye_r, py_right - eye_r,
+            px_right + eye_r, py_right + eye_r,
+            fill="#ffffff", outline=glow_color, width=3
         )
 
-    def draw_eyebrows(self):
-        y_offset = -75
-        left_eb_x1 = self.eye_left_center[0] - 50
-        left_eb_y1 = self.eye_left_center[1] + y_offset
-        left_eb_x2 = self.eye_left_center[0] + 50
-        left_eb_y2 = self.eye_left_center[1] + y_offset
-        
-        right_eb_x1 = self.eye_right_center[0] - 50
-        right_eb_y1 = self.eye_right_center[1] + y_offset
-        right_eb_x2 = self.eye_right_center[0] + 50
-        right_eb_y2 = self.eye_right_center[1] + y_offset
-        
-        if self.state == "LISTENING":
-            left_eb_y1 -= 15
-            left_eb_y2 -= 15
-            right_eb_y1 -= 15
-            right_eb_y2 -= 15
-        elif self.state == "THINKING":
-            left_eb_y1 += 5
-            left_eb_y2 -= 15
-            right_eb_y1 -= 15
-            right_eb_y2 += 5
-        elif self.state == "SPEAKING":
-            bounce = math.sin(time.time() * 15) * 5
-            left_eb_y1 += bounce
-            left_eb_y2 += bounce
-            right_eb_y1 += bounce
-            right_eb_y2 += bounce
-
-        # Draw left eyebrow
-        self.canvas.create_line(
-            left_eb_x1, left_eb_y1, left_eb_x2, left_eb_y2,
-            fill="black", width=8, capstyle="round"
-        )
-        # Draw right eyebrow
-        self.canvas.create_line(
-            right_eb_x1, right_eb_y1, right_eb_x2, right_eb_y2,
-            fill="black", width=8, capstyle="round"
-        )
-
-    def draw_mouth(self):
+    def draw_mouth(self, glow_color):
         cx, cy = self.mouth_center
         
-        if self.state == "LISTENING":
-            self.canvas.create_arc(
-                cx - 60, cy - 20, cx + 60, cy + 20,
-                start=180, extent=180, fill="black", outline=""
+        if self.state == "SPEAKING":
+            # Circular Audio Waveform: Draw radiating spokes around a circle
+            base_radius = 35
+            num_spokes = 24
+            max_spoke_len = 45
+            
+            # Draw the base circle
+            self.canvas.create_oval(
+                cx - base_radius, cy - base_radius,
+                cx + base_radius, cy + base_radius,
+                outline=glow_color, width=2
             )
+            
+            # Draw the glowing frequency spokes
+            for i in range(num_spokes):
+                angle = i * (2 * math.pi / num_spokes)
+                # Randomize spoke height based on volume ratio to simulate sound waves
+                spoke_len = self.mouth_open_ratio * max_spoke_len * random.uniform(0.3, 1.1)
+                
+                # Math coordinates for inner and outer points of the spoke
+                x_inner = cx + base_radius * math.cos(angle)
+                y_inner = cy + base_radius * math.sin(angle)
+                x_outer = cx + (base_radius + spoke_len) * math.cos(angle)
+                y_outer = cy + (base_radius + spoke_len) * math.sin(angle)
+                
+                self.canvas.create_line(
+                    x_inner, y_inner, x_outer, y_outer,
+                    fill=glow_color, width=3, capstyle="round"
+                )
         elif self.state == "THINKING":
+            # Pulsating circle indicating computation
+            pulse = math.sin(time.time() * 8) * 5
+            radius = 30 + pulse
             self.canvas.create_oval(
-                cx - 20, cy - 20, cx + 20, cy + 20,
-                fill="black", outline=""
+                cx - radius, cy - radius,
+                cx + radius, cy + radius,
+                outline=glow_color, width=2, dash=(6, 4)
             )
-        elif self.state == "SPEAKING":
-            m_width = 120 - (self.mouth_open_ratio * 20)
-            m_height = 10 + (self.mouth_open_ratio * 100)
+        elif self.state == "LISTENING":
+            # Small, solid alert dot waiting for audio input
+            radius = 12
             self.canvas.create_oval(
-                cx - m_width/2, cy - m_height/2,
-                cx + m_width/2, cy + m_height/2,
-                fill="black", outline=""
+                cx - radius, cy - radius,
+                cx + radius, cy + radius,
+                fill=glow_color, outline=""
             )
         else:  # IDLE
-            self.canvas.create_arc(
-                cx - 70, cy - 30, cx + 70, cy + 20,
-                start=180, extent=180, fill="black", outline=""
+            # Normal resting circle
+            radius = 30
+            self.canvas.create_oval(
+                cx - radius, cy - radius,
+                cx + radius, cy + radius,
+                outline=glow_color, width=2
             )
 
     def update_loop(self):
+        # Blinking logic
         self.blink_timer += 1
         if not self.blink_active:
             if self.blink_timer > random.randint(120, 360):
@@ -274,6 +260,7 @@ class FaceGUI:
                 self.blink_active = False
                 self.blink_timer = 0
                 
+        # Look around logic (IDLE and THINKING only)
         self.look_timer += 1
         if self.state == "THINKING":
             self.look_offset_x = math.sin(time.time() * 3) * 0.8
