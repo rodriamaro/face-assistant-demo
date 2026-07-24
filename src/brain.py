@@ -73,7 +73,7 @@ def arxiv_search(query: str) -> str:
 
 
 class AssistantBrain:
-    def __init__(self, model_name="llama3.1"):
+    def __init__(self, model_name="qwen2.5:32b"):
         self.model_name = model_name
         self.history = []
         
