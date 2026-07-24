@@ -1,0 +1,8 @@
+pygame
+numpy
+sounddevice
+soundfile
+ollama
+faster-whisper
+silero-vad
+onnxruntime
